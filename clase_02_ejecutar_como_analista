@@ -1,68 +1,81 @@
 # Clase 2: Ejecutar como Analista (Proyecto Real) 🧠
+
 **Academia:** Unicorn  
 **Objetivo:** Pasar de la tabla cruda al impacto en el negocio mediante limpieza, transformación y visualización.
 
 ---
 
 ## 1. Bases de la Ejecución: Datos y Tablas
+
 Antes de operar, el analista debe entender con qué tipo de información cuenta para no romper la integridad del proyecto.
 
-* **Datos Estáticos:** Son los históricos del pasado. No se van actualizando (ej. lo que ya pasó).
-* **Datos Dinámicos:** Se actualizan mediante sistemas (ETLs) que corren por detrás. Es lo que está pasando ahora.
-* **Validación:** La primera tarea es filtrar y monitorear las filas de los datos crudos viendo las franjas. Hay que hacerse preguntas: *¿Tienen sentido estos números? ¿Hay errores de carga humana o de software?*
+| Tipo de Dato | Definición | Contexto |
+| :--- | :--- | :--- |
+| **Estáticos** | Históricos del pasado. No se van actualizando. | Lo que ya pasó. |
+| **Dinámicos** | Se actualizan mediante sistemas (ETLs) por detrás. | Lo que está pasando ahora. |
+
+* **Validación:** La primera tarea es filtrar y monitorear las filas de los datos crudos viendo las franjas.
+* **Pregunta Norte:** ¿Tienen sentido estos números? ¿Hay errores de carga humana o de software?
 
 ---
 
 ## 2. Reglas de Oro en la Transformación
-Para que un proyecto sea profesional y auditable, se siguen estas normas:
-1. **La tabla original NO se toca:** Los datos crudos de la base de datos de la empresa son el respaldo.
-2. **Respaldo:** Siempre hay que tener la original para demostrar con qué trabajamos al inicio y qué hicimos.
-3. **Columnas nuevas:** Las transformaciones y cálculos se hacen siempre en columnas aparte.
-4. **Entorno de trabajo:** En proyectos dinámicos, se lee la tabla cruda y mediante código (SQL) o funciones se genera una tabla trabajada independiente.
+
+Para que un proyecto sea profesional y auditable, se siguen estas normas fundamentales:
+
+* **Regla de oro:** La tabla original (datos crudos) **NO SE TOCA**. Es el respaldo de la operación.
+* **Respaldo:** Siempre mantener la original para demostrar con qué trabajamos al inicio y qué cambios hicimos.
+* **Trazabilidad:** Las transformaciones y cálculos se hacen siempre en columnas aparte o tablas espejo independientes.
+* **Acceso:** En entornos dinámicos, leemos la tabla cruda y mediante código (SQL) generamos una tabla trabajada sin alterar la fuente.
 
 ---
 
-## 3. Manos a la Obra: Transformación (Caso Cafetería - 54k ventas)
-Se trabajó sobre una base de **54,000 ventas**. Un punto clave es la **granularidad**: cada fila no representa una venta total, sino un producto vendido (un mismo ticket puede tener muchas filas).
+## 3. Manos a la Obra: Transformación (Caso Cafetería)
+
+Trabajamos sobre una base de **54,000 ventas**. Es clave entender la **Granularidad**: cada fila representa un producto vendido, no un ticket total.
 
 ### A. Campos Calculados (Métricas de Rentabilidad)
-El sistema no siempre da la información masticada, por lo que el analista crea sus propios campos:
 
-| Campo | Lógica del Cálculo |
-| :--- | :--- |
-| **Ingresos** | Precio de venta × Unidades vendidas. |
-| **Costo Total** | Costo del producto × Unidades vendidas. |
-| **Margen (Rentabilidad)** | Ingreso − Costo. La diferencia real que queda. |
+El analista crea sus propios campos cuando el sistema no da la información masticada:
+
+| Campo | Lógica del Cálculo | Objetivo |
+| :--- | :--- | :--- |
+| **Ingresos** | Precio de venta × Unidades vendidas | Calcular el bruto de venta. |
+| **Costo Total** | Costo del producto × Unidades vendidas | Calcular el gasto operativo. |
+| **Margen** | Ingreso − Costo Total | Identificar la rentabilidad real. |
 
 ### B. Normalización de Fechas
-Para poder hacer un análisis mensual, se transformó el formato de la fecha exacta (día/hora):
-* **Objetivo:** Pasar de "día a día" a solo **Mes y Año**.
-* **Función:** Se usa una función en Google Sheets o Excel (como FECHA o TEXTO). Una función debe tener un nombre y parámetros para ejecutarse.
-* **Automatización:** Una vez creada la fórmula, se arrastra por toda la columna para transformar los 54k datos de una.
+
+* **Problema:** El sistema entrega la fecha día a día y se requiere un análisis de tendencia mensual.
+* **Solución:** Transformar el formato de "día a día" a solo **Mes y Año**.
+* **Técnica:** Se utiliza una función (como FECHA o TEXTO). Una vez definida la lógica, se arrastra por toda la columna para procesar los 54k registros.
 
 ---
 
-## 4. Segmentación y Escalabilidad
-### Segmentación (Clasificación lógica)
-Segmentar es agrupar información por alguna característica definida por condiciones lógicas (SI/IF) que clasifican los registros.
-* **Ejemplo:** Tramos de Ticket (Bajo, Medio, Alto).
-* **Utilidad:** Permite ver qué grupo de clientes o productos mueven la aguja del negocio y dónde están las preferencias de gasto.
+## 4. Segmentación y Escalabilidad (Arquitectura)
 
-### El salto a SQL y BigQuery
-Cuando el volumen de datos supera las capacidades de Excel/Sheets (millones de filas):
-* **SQL:** Permite procesar los datos de forma rápida y limpia mediante código.
-* **BigQuery:** Se utiliza para automatizar las transformaciones en la nube y que el dashboard se actualice solo.
+* **Etapa 1: Segmentación:** Agrupar información por características definidas por condiciones lógicas (SI/IF) para clasificar registros.
+* **Etapa 2: Ejemplo Práctico:** Tramos de Ticket (Bajo, Medio, Alto) para ver qué grupo de clientes mueve la aguja del negocio.
+* **Etapa 3: Escalabilidad (SQL):** Cuando el volumen supera las capacidades de Excel (millones de filas), accedemos mediante SQL a BigQuery para automatizar la limpieza en la nube.
 
 ---
 
 ## 5. Visualización e Impacto (Looker Studio)
-El trabajo técnico termina conectando la tabla limpia a un dashboard interactivo.
-* **Dimensión:** El "por qué" queremos cortar los datos (Mes, Categoría de producto, Producto).
-* **Métrica:** El número frío (Suma de ingresos, promedio de margen).
-* **Impacto Real:** El dashboard debe servir para tomar decisiones. Si un producto tiene margen negativo, se detecta la fuga de dinero y se actúa. **El analista no hace gráficos lindos, cuantifica el impacto económico.**
+
+El trabajo técnico termina en un dashboard interactivo que debe servir para la toma de decisiones.
+
+| Concepto | Respuesta del Analista |
+| :--- | :--- |
+| **Dimensión** | El "por qué" cortamos los datos (Mes, Categoría, Producto). |
+| **Métrica** | El número frío (Suma de ingresos, promedio de margen). |
+| **Impacto** | Detectar "fugas de dinero" y proponer acciones comerciales. |
+
+> **Conclusión:** El analista no hace gráficos lindos, **cuantifica el impacto económico**. El éxito es que el análisis se pague solo mediante la optimización del negocio.
 
 ---
 
 ## 6. Próximos Pasos 🚀
+
 * **Clase 3:** Análisis de negocio profundo y presentación de resultados al cliente.
 * **Objetivo Final:** Traducir hallazgos técnicos en lenguaje de negocio para generar valor real.
+
